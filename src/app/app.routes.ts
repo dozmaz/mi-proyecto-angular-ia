@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+
+import { authGuard } from './core/auth/auth.guard';
 import { ShellComponent } from './core/layout/shell.component';
 
 export const routes: Routes = [
@@ -18,6 +20,7 @@ export const routes: Routes = [
 	  },
 	  {
 		path: 'todos',
+		canActivate: [authGuard],
 		loadChildren: () =>
 		  import('./features/todos/todos.routes').then((m) => m.todosRoutes),
 	  },
