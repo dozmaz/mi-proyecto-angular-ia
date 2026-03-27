@@ -57,6 +57,15 @@ import { AuthService } from '../../../core/auth/auth.service';
             }
           </div>
 
+          <div class="field-group field-group--checkbox">
+            <input
+              id="remember-me"
+              type="checkbox"
+              formControlName="rememberMe"
+            />
+            <label for="remember-me">Recordar usuario</label>
+          </div>
+
           @if (authError()) {
             <p aria-live="assertive" class="auth-error">{{ authError() }}</p>
           }
@@ -147,6 +156,22 @@ import { AuthService } from '../../../core/auth/auth.service';
     .submit-button:hover {
       background: #1e40af;
     }
+
+    .field-group--checkbox {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #remember-me {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
+
+    #remember-me + label {
+      cursor: pointer;
+    }
   `,
 })
 export class LoginPageComponent {
@@ -160,6 +185,7 @@ export class LoginPageComponent {
   readonly form = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(4)]],
+    rememberMe: [false],
   });
 
   get usernameInvalid(): boolean {
@@ -173,6 +199,12 @@ export class LoginPageComponent {
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
       void this.router.navigateByUrl(this.getRedirectUrl(), { replaceUrl: true });
+      return;
+    }
+
+    const savedUsername = this.authService.savedUsername();
+    if (savedUsername) {
+      this.form.patchValue({ username: savedUsername, rememberMe: true });
     }
   }
 
@@ -185,11 +217,18 @@ export class LoginPageComponent {
       return;
     }
 
-    const didLogin = this.authService.login(this.form.getRawValue());
+    const { rememberMe, username, password } = this.form.getRawValue();
+    const didLogin = this.authService.login({ username, password });
 
     if (!didLogin) {
       this.authError.set('No fue posible iniciar sesion. Intentalo de nuevo.');
       return;
+    }
+
+    if (rememberMe) {
+      this.authService.rememberUsername(username);
+    } else {
+      this.authService.forgetUsername();
     }
 
     void this.router.navigateByUrl(this.getRedirectUrl(), { replaceUrl: true });

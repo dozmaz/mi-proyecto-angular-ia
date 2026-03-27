@@ -11,16 +11,30 @@ export interface LoginCredentials {
 }
 
 export const AUTH_STORAGE_KEY = 'mi-proyecto-angular.auth';
+export const REMEMBER_ME_STORAGE_KEY = 'mi-proyecto-angular.remember-me';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly storage = isPlatformBrowser(this.platformId) ? globalThis.localStorage : null;
   private readonly sessionState = signal<AuthSession | null>(this.readStoredSession());
+  private readonly savedUsernameState = signal<string>(this.readSavedUsername());
 
   readonly session = computed(() => this.sessionState());
   readonly isAuthenticated = computed(() => this.sessionState() !== null);
   readonly username = computed(() => this.sessionState()?.username ?? '');
+  readonly savedUsername = computed(() => this.savedUsernameState());
+
+  rememberUsername(username: string): void {
+    const trimmed = username.trim();
+    this.savedUsernameState.set(trimmed);
+    this.storage?.setItem(REMEMBER_ME_STORAGE_KEY, trimmed);
+  }
+
+  forgetUsername(): void {
+    this.savedUsernameState.set('');
+    this.storage?.removeItem(REMEMBER_ME_STORAGE_KEY);
+  }
 
   login(credentials: LoginCredentials): boolean {
     const username = credentials.username.trim();
@@ -40,6 +54,10 @@ export class AuthService {
   logout(): void {
     this.sessionState.set(null);
     this.storage?.removeItem(AUTH_STORAGE_KEY);
+  }
+
+  private readSavedUsername(): string {
+    return this.storage?.getItem(REMEMBER_ME_STORAGE_KEY) ?? '';
   }
 
   private readStoredSession(): AuthSession | null {

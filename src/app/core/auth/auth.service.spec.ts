@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AUTH_STORAGE_KEY, AuthService } from './auth.service';
+import { AUTH_STORAGE_KEY, REMEMBER_ME_STORAGE_KEY, AuthService } from './auth.service';
 
 describe('AuthService', () => {
   const createService = (): AuthService => {
@@ -51,6 +51,41 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(false);
     expect(service.session()).toBeNull();
     expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
+  });
+
+  describe('remember-me', () => {
+    it('should start with empty savedUsername when nothing is stored', () => {
+      const service = createService();
+
+      expect(service.savedUsername()).toBe('');
+    });
+
+    it('should restore savedUsername from localStorage on init', () => {
+      localStorage.setItem(REMEMBER_ME_STORAGE_KEY, 'pedro');
+
+      const service = createService();
+
+      expect(service.savedUsername()).toBe('pedro');
+    });
+
+    it('should persist the username when rememberUsername is called', () => {
+      const service = createService();
+
+      service.rememberUsername('  lucia  ');
+
+      expect(service.savedUsername()).toBe('lucia');
+      expect(localStorage.getItem(REMEMBER_ME_STORAGE_KEY)).toBe('lucia');
+    });
+
+    it('should clear the saved username when forgetUsername is called', () => {
+      const service = createService();
+      service.rememberUsername('tomas');
+
+      service.forgetUsername();
+
+      expect(service.savedUsername()).toBe('');
+      expect(localStorage.getItem(REMEMBER_ME_STORAGE_KEY)).toBeNull();
+    });
   });
 });
 

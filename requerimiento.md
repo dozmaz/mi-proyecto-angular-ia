@@ -130,6 +130,10 @@ Criterio sugerido de cobertura:
 - Crear pantalla de login y guard de proteccion.
 - Implementar logout desde layout principal.
 
+#### fase 2.1 recordar usuario
+- implementar checkbox "Recordar usuario" en login.
+- Si se marca, guardar usuario en `localStorage` y precargarlo en el formulario
+
 ### Fase 3 - Feature de tareas
 - Modelar entidad `Todo` y servicio de datos (`TodoApiService`).
 - Implementar `Home` con listado y estados (`loading`, `empty`, `error`).

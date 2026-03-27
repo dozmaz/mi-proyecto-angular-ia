@@ -33,6 +33,7 @@ function parseIdFromUrl(url: string): number | null {
   return Number.isInteger(parsed) ? parsed : null;
 }
 
+//
 function toResponse<T>(body: T, status = 200): Observable<HttpEvent<T>> {
   return of(new HttpResponse<T>({ status, body })).pipe(delay(MOCK_LATENCY_MS));
 }
